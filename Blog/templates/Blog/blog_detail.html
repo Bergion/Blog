@@ -1,0 +1,37 @@
+{% extends 'Blog/generic.html' %}
+
+
+
+{% block title %}
+    <title>Blog</title>
+{% endblock title %}
+    
+
+{% block content %}
+    <h1>{{ blog.name }}</h1>
+    <br>
+    
+    {% if user.is_authenticated %}        
+
+        {% if blog.user == user %}
+            <a href="#">New post</a>
+        {% else %}
+            <form action="{% url 'blog-detail' blog.id%}" method="post">
+                {% csrf_token %}
+                <input type="submit" value="{% if not subbed %}Subscribe{% else %}Unsubscribe{% endif %}">
+            </form>
+        {% endif %}
+    {% endif %}   
+
+    
+        {% for post in blog.post.all  %}
+            <div class="post-box" style="margin-top:100px">
+                <a href="#"><h3>{{ post.title }}</h3></a>
+                <p>{{ post.content }}</p>
+                <p>Created: {{ post.pub_date|timesince }} ago</p>
+            </div>
+        {% endfor %}
+  
+        
+{% endblock content %}
+    

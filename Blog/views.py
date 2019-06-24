@@ -20,3 +20,23 @@ class HomeView(generic.ListView):
         else:
             blogs = Blog.objects.all()
         return blogs
+
+
+class BlogDetailView(generic.DetailView):
+    model = Blog
+    
+    def post(self, request, *args, **kwargs):
+        blog = self.get_object()
+        subscription, created = Subscription.objects.get_or_create(user=request.user, blog=blog)
+        if not created:
+            subscription.delete()
+
+        return redirect(blog.get_absolute_url())
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        try:
+            context['subbed'] = Subscription.objects.filter(Q(user=self.request.user) & Q(blog=self.get_object())).exists()
+            return context
+        except TypeError:
+            return context
