@@ -40,3 +40,20 @@ class BlogDetailView(generic.DetailView):
             return context
         except TypeError:
             return context
+
+
+class PostDetailView(generic.DetailView):
+    model = Post
+
+
+class PostCreateView(LoginRequiredMixin, generic.CreateView):
+    login_url = reverse_lazy('sign-in')
+    model = Post
+    fields = ('title', 'content', )
+    
+    def get_success_url(self):
+        return self.request.user.blog.get_absolute_url()
+
+    def form_valid(self, form):
+        form.instance.blog = self.request.user.blog
+        return super().form_valid(form)

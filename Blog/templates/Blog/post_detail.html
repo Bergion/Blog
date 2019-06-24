@@ -1,0 +1,17 @@
+{% extends 'Blog/generic.html' %}
+
+
+
+{% block title %}
+    <title>Post</title>
+{% endblock title %}
+
+
+{% block content %}
+    <h1>{{ post.title }}</h1>
+    <p>{{ post.content }}</p>
+    <a href="{{ post.blog.get_absolute_url }}">{{ post.blog }}</a>
+    <p>Created: {{ post.pub_date|timesince }} ago</p>
+{% endblock content %}
+    
+    
