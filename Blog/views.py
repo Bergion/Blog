@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.views import generic
-from .models import Blog, Post, Subscription
+from .models import Blog, Post, Subscription, MarkedAsRead
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q
@@ -57,3 +57,18 @@ class PostCreateView(LoginRequiredMixin, generic.CreateView):
     def form_valid(self, form):
         form.instance.blog = self.request.user.blog
         return super().form_valid(form)
+
+
+class PostListView(LoginRequiredMixin, generic.ListView):
+    login_url = reverse_lazy('sign-in')
+    model = Post
+
+    def post(self, request, *args, **kwargs):
+        post = Post.objects.get(id=request.POST['id'])
+        MarkedAsRead.objects.create(user=request.user, post=post)
+        return redirect(reverse('news'))
+
+    def get_queryset(self):
+        subscribed_blogs = Blog.objects.filter(subscription__user=self.request.user)
+        posts = Post.objects.filter(blog__in=subscribed_blogs).exclude(marked__user=self.request.user)
+        return posts

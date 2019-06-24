@@ -42,8 +42,22 @@ class Subscription(models.Model):
     class Meta:
         unique_together = ('user', 'blog')
 
+
+class MarkedAsRead(models.Model):
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='marked')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='marked')
+
+    class Meta:
+        unique_together = ('user', 'post')
+
 @receiver(post_save, sender=User)
 def save_blog(sender, instance, created, **kwargs):
     if created:
         name = "{}'s Blog".format(instance.get_username())
         Blog.objects.create(user=instance, name=name)
+
+@receiver(pre_delete, sender=Subscription)
+def delete_marks(sender, instance, **kwargs):
+    blogs_posts = Post.objects.filter(blog=instance.blog)
+    MarkedAsRead.objects.filter(user=instance.user, post__in=blogs_posts).delete()
