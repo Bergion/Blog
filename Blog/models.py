@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
+
+
 # Create your models here.
 
 
@@ -54,10 +56,12 @@ class MarkedAsRead(models.Model):
 @receiver(post_save, sender=User)
 def save_blog(sender, instance, created, **kwargs):
     if created:
-        name = "{}'s Blog".format(instance.get_username())
+        name = "{}s Blog".format(instance.get_username())
         Blog.objects.create(user=instance, name=name)
 
 @receiver(pre_delete, sender=Subscription)
 def delete_marks(sender, instance, **kwargs):
     blogs_posts = Post.objects.filter(blog=instance.blog)
     MarkedAsRead.objects.filter(user=instance.user, post__in=blogs_posts).delete()
+
+

@@ -2,11 +2,28 @@ from django.shortcuts import render, redirect
 from django.views import generic
 from .models import Blog, Post, Subscription, MarkedAsRead
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models.signals import post_save, pre_delete
+from django.dispatch import receiver
+from django.core.mail import send_mail
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q
+from django.template.loader import render_to_string
 from django.http import HttpResponseRedirect
-
+from django.contrib.sites.models import Site
 # Create your views here.
+
+@receiver(post_save, sender=Post)
+def send_notification(sender, instance, **kwargs):
+    recipient_list = Subscription.objects.filter(blog=instance.blog).exclude(user__email='')
+    if recipient_list.exists():
+        recipient_list = recipient_list.values_list('user__email', flat=True)
+        subject = 'New post'
+        domain = Site.objects.get_current().domain
+        print(domain)
+        post_url = "http://{0}:8000{1}".format(domain, instance.get_absolute_url())
+        message = render_to_string('email/notification.html', {'blog':instance.blog, 'post_url':post_url})
+        send_mail(subject, message=message, from_email='Blog', recipient_list=recipient_list)
+
 
 
 class HomeView(generic.ListView):

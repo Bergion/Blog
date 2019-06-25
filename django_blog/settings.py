@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     'Blog.apps.BlogConfig',
     'crispy_forms',
 ]
@@ -111,4 +112,16 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+# Login
 LOGIN_REDIRECT_URL = '/'
+
+# Using gmail smtp
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'dd0773489@gmail.com'
+EMAIL_HOST_PASSWORD = 'Dqwerdqwer0'
+EMAIL_PORT = 587
+
+# Site framework
+SITE_ID = 1
